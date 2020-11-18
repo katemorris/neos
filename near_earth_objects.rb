@@ -6,20 +6,6 @@ Figaro.load
 
 # How do I use private in this class?
 class NearEarthObjects
-  def root_data(date)
-    Faraday.new(
-      url: 'https://api.nasa.gov',
-      params: { start_date: date, api_key: ENV['nasa_api_key']}
-    )
-  end
-
-  def asteroids_list_data(date)
-    root_data(date).get('/neo/rest/v1/feed')
-  end
-
-  def parsed_asteroids_data(date)
-    JSON.parse(asteroids_list_data(date).body, symbolize_names: true)[:near_earth_objects][:"#{date}"]
-  end
 
   def largest_asteroid_diameter(date)
     parsed_asteroids_data(date).map do |asteroid|
@@ -48,5 +34,22 @@ class NearEarthObjects
       biggest_asteroid: new.largest_asteroid_diameter(date),
       total_number_of_asteroids: new.total_number_of_asteroids(date)
     }
+  end
+
+  private
+
+  def root_data(date)
+    Faraday.new(
+      url: 'https://api.nasa.gov',
+      params: { start_date: date, api_key: ENV['nasa_api_key']}
+    )
+  end
+
+  def asteroids_list_data(date)
+    root_data(date).get('/neo/rest/v1/feed')
+  end
+
+  def parsed_asteroids_data(date)
+    JSON.parse(asteroids_list_data(date).body, symbolize_names: true)[:near_earth_objects][:"#{date}"]
   end
 end
